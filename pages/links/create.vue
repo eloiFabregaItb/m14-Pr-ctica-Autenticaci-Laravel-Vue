@@ -9,3 +9,10 @@
     <button class="btn">Create Link</button>
   </form>
 </template>
+
+<script setup>
+definePageMeta({
+  middleware:["auth"]
+})
+
+</script>

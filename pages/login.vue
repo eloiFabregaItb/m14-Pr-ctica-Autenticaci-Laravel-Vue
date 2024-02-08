@@ -2,9 +2,11 @@
 import axios from 'axios';
 
 const router = useRouter()
+const {login} = useAuth()
 
 definePageMeta({
   layout: "centered",
+  middleware:["guest"]
 });
 
 interface formData {
@@ -46,8 +48,9 @@ async function handleSubmit(){
   }
   try{
 
-    await axios.post("/login",payload)
-    router.push('/me')
+    await login(payload)
+    // await axios.post("/login",payload)
+    // router.push('/me')
 
   
   }catch(error){

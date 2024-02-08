@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {watch,ref} from "vue"
-import axios from "axios"
+import {useAuth, RegisterPayload} from "../composables/useAuth"
+
+const {register} = useAuth()
 
 interface formData {
   name: string;
@@ -25,6 +27,7 @@ const errors = ref<formData>({
 
 definePageMeta({
   layout: "centered",
+  middleware: ["guest"]
 });
 
 watch(form.value,()=>{
@@ -57,18 +60,17 @@ async function handleSubmit(){
   if(someErr) return
 
 
-  const payload = {
+  const payload:RegisterPayload = {
     email:form.value.email,
     name:form.value.name,
     password:form.value.password,
     password_confirmation:form.value.password,
   }
+  
   try{
-
-    const response = await axios.post("/register",payload)
-    console.log(response.data)
+    register(payload)
   }catch(err){
-    const data = err.response.data
+    const data = err?.response?.data
     if(data.message){
       alert(data.message)
     }

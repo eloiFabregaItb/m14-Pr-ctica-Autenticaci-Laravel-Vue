@@ -4,15 +4,8 @@
 
 
 <script setup>
-import axios from 'axios';
+const {logout} = useAuth()
 
-const router = useRouter()
+logout()
 
-try{
-  await axios.get("/logout")
-}catch{
-
-}finally{
-  router.replace("/login")
-}
 </script>

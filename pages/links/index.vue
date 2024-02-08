@@ -1,4 +1,8 @@
 <script setup lang="ts">
+definePageMeta({
+  nuddleware:["auth"]
+})
+
 const links = [
   {
     short_link: "234jlsfsf",
@@ -105,3 +109,5 @@ const links = [
     </div>
   </div>
 </template>
+
+

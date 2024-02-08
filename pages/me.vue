@@ -7,6 +7,9 @@
 <script setup>
 
 import axios from "axios"
+definePageMeta({
+  middleware:["auth"]
+})
 
 const email = ref("")
 const name = ref("")
@@ -14,7 +17,7 @@ async function fetchData(){
   const response = await axios.get("/user")
   email.value = response.data.email
   name.value = response.data.name
-  
+
 
 }
 
