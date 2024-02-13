@@ -1,10 +1,8 @@
+const {user, initUser} = useAuth()
 
-import axios from "axios";
 export default defineNuxtRouteMiddleware(async (to,from)=>{
-    try{
-        const {data:user} = await axios.get("/user")
-        if(user){
-            return navigateTo("/me")
-        }
-    }catch{}
+    await initUser()
+    if(user){
+        return navigateTo("/me")
+    }
 })
