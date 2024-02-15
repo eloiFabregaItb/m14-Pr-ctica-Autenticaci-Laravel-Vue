@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import axios from 'axios';
-
-const router = useRouter()
+import { AxiosError } from 'axios';
+import { useAuth } from '~~/composables/useAuth';
+import { LoginPayload } from '~~/types';
 const {login} = useAuth()
 
 definePageMeta({
@@ -9,52 +9,16 @@ definePageMeta({
   middleware:["guest"]
 });
 
-interface formData {
-  email: string;
-  password: string;
-}
+async function handleSubmit(payload:LoginPayload,node?:any){
 
-const form = ref<formData>({
-  email:"",
-  password:"",
-})
-
-const errors = ref<formData>({
-  email:"",
-  password:"",
-})
-
-watch(form.value,()=>{
-  errors.value.email=""
-  errors.value.password=""
-})
-
-async function handleSubmit(){
-  let someErr = false
-  if(form.value.email.length<=0){
-    errors.value.email = "Campo obligatorio"
-    someErr = true
-  }
-  if(form.value.password.length<=0){
-    errors.value.password = "Campo obligatorio"
-    someErr = true
-  }
-  if(someErr) return
-
-
-  const payload = {
-    email:form.value.email,
-    password:form.value.password,
-  }
   try{
 
     await login(payload)
-    // await axios.post("/login",payload)
-    // router.push('/me')
-
   
   }catch(error){
-    errors.value.password = error?.response?.message || "Contraseña incorrecta"
+    if(error instanceof AxiosError && error.response?.status===422){ 
+      node?.setErrors([],error.response.data.errors)
+    }
   }
 
   
@@ -63,20 +27,10 @@ async function handleSubmit(){
 <template>
   <div class="login">
     <h1>Login</h1>
-    <form @submit.prevent="handleSubmit">
-      <label>
-        <div>Email</div>
-        <input v-model="form.email" type="text" />
-        <span class="error" v-if="errors.email">{{ errors.email  }}</span>
-      </label>
-
-      <label>
-        <div>Password</div>
-        <input v-model="form.password" type="password" />
-        <span class="error" v-if="errors.password">{{ errors.password}}</span>
-      </label>
-      <button class="btn">Login</button>
-    </form>
+    <FormKit type="form" submit-label="Login" @submit="handleSubmit">
+      <FormKit label="Email" name="email" type="email"/>
+      <FormKit label="Password" name="password" type="password"/>
+    </FormKit>
 
     <p>
       Don't have an account?

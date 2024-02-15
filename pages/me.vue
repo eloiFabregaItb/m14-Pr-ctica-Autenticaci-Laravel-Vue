@@ -6,11 +6,15 @@
 
 <script setup>
 
+
+import { useAuth } from '~~/composables/useAuth'
+
 definePageMeta({
   middleware:["auth"]
 })
 
 const {initUser,user} = useAuth()
 await initUser()
+
 
 </script>

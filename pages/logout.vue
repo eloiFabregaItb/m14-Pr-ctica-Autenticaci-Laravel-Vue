@@ -4,6 +4,8 @@
 
 
 <script setup>
+
+import { useAuth } from '~~/composables/useAuth';
 const {logout} = useAuth()
 
 logout()
