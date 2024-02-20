@@ -11,23 +11,20 @@ definePageMeta({
 
 async function handleSubmit(payload:LoginPayload,node?:any){
 
-  try{
-
-    await login(payload)
-  
-  }catch(error){
-    if(error instanceof AxiosError && error.response?.status===422){ 
-      node?.setErrors([],error.response.data.errors)
-    }
-  }
+  handleInvalidRequest(async ()=> await login(payload) , node)
 
   
 }
+
+
+const a = handleInvalidFormSubmit<LoginPayload>(login)
+
+
 </script>
 <template>
   <div class="login">
     <h1>Login</h1>
-    <FormKit type="form" submit-label="Login" @submit="handleSubmit">
+    <FormKit type="form" submit-label="Login" @submit="a">
       <FormKit label="Email" name="email" type="email"/>
       <FormKit label="Password" name="password" type="password"/>
     </FormKit>

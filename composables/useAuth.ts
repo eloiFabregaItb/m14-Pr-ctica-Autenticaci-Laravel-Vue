@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 
 import { LoginPayload, RegisterPayload, User } from "~~/types";
 
@@ -16,7 +16,7 @@ export const useAuth = () => {
 
   async function register(payload: RegisterPayload) {
     await axios.post("/register", payload)
-    router.push("/me")
+    router.push("/me")   
   }
 
   async function logout() {
