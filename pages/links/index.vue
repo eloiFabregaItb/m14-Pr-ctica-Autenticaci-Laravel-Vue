@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import axios from 'axios';
+
 definePageMeta({
   nuddleware:["auth"]
 })
 
-const links = [
+const links = ref([
   {
     short_link: "234jlsfsf",
     full_link: "https://vueschool.io",
@@ -22,7 +24,23 @@ const links = [
     views: 0,
     id: 3,
   },
-];
+])
+
+
+
+async function getLinks(){
+
+  try{
+    const response = await axios.get("/links")
+    console.log(response.data)
+    links.value = response.data.data
+  }catch(err){
+    console.error(err.response.data)
+  }
+}
+
+getLinks()
+
 </script>
 <template>
   <div>

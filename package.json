@@ -19,7 +19,7 @@
     "@vueuse/nuxt": "^9.11.0",
     "axios": "^1.6.7",
     "laravel-vue-pagination": "^4.0.0",
-    "nanoid": "^4.0.0",
+    "nanoid": "^4.0.2",
     "query-string": "^8.1.0"
   }
 }

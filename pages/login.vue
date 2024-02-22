@@ -17,14 +17,14 @@ async function handleSubmit(payload:LoginPayload,node?:any){
 }
 
 
-const a = handleInvalidFormSubmit<LoginPayload>(login)
+const handleLogin = handleInvalidFormSubmit<LoginPayload>(login)
 
 
 </script>
 <template>
   <div class="login">
     <h1>Login</h1>
-    <FormKit type="form" submit-label="Login" @submit="a">
+    <FormKit type="form" submit-label="Login" @submit="handleLogin">
       <FormKit label="Email" name="email" type="email"/>
       <FormKit label="Password" name="password" type="password"/>
     </FormKit>
