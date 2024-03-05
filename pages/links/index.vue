@@ -6,14 +6,27 @@ definePageMeta({
   nuddleware:["auth"]
 })
 
+const route = useRoute()
+console.log("PARAMS",)
+
 const links = ref([]) // enllaços acortados
 const paginationData = ref({})
-const page = ref(1)
+const page = ref(route.query.page || 1)
+
+const search = ref("")
+const debouncedSearch = refDebounced(search,200)
 
 async function getLinks(){
 
   try{
-    const response = await axios.get("/links?page="+page.value)
+    const params = new URLSearchParams()
+    params.set("page",page.value.toString())
+    if(debouncedSearch.value){
+      params.set("filter[full_link]",debouncedSearch.value)
+    }
+    const apiURL = "/links?"+params.toString()
+    console.log("SEARCH",apiURL)
+    const response = await axios.get(apiURL)
     const data = response.data
     links.value = data.data
 
@@ -25,8 +38,19 @@ async function getLinks(){
 }
 
 watch(page,()=>getLinks())
+watch(route.fullPath,()=>{page.value = route.query.page || 1})
+watch(debouncedSearch,()=>getLinks())
 
 getLinks()
+
+function handleNewPage(n:number){
+  page.value = n
+
+  const params = new URLSearchParams(window.location.search.slice(1))
+  params.set("page",n.toString())
+  const newURL = window.location.origin + window.location.pathname +"?"+ params.toString()
+  window.history.pushState({  }, '', newURL);
+}
 
 </script>
 <template>
@@ -34,7 +58,7 @@ getLinks()
     <nav class="flex justify-between mb-4 items-center">
       <h1 class="mb-0">My Links</h1>
       <div class="flex items-center">
-        <SearchInput modelValue="" />
+        <SearchInput :modelValue="search" @update:modelValue="e=>search = e" />
         <NuxtLink to="/links/create" class="ml-4">
           <IconPlusCircle class="inline" /> Create New
         </NuxtLink>
@@ -90,7 +114,7 @@ getLinks()
       </table>
       <div class="mt-5 flex justify-center">
       
-      <TailwindPagination :data="paginationData" @pagination-change-page="page=$event"/>
+      <TailwindPagination :data="paginationData" @pagination-change-page="handleNewPage($event)"/>
 
       </div>
     </div>
