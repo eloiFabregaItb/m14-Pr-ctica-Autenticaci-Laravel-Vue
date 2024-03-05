@@ -23,14 +23,18 @@ definePageMeta({
 
 
 async function createLink(payload: LoginPayload, node?:FormKitNode){
+  console.log("create")
   try{
     await axios.post("/links",{
       ...payload,
-      short_link: nanoid(8)
+      short_link: nanoid(8) 
     })
+    useRouter().push("/links")
   }catch(err){
+    console.error(err)
     handleInvalidForm(err,node)
   }
+  
 }
 
 

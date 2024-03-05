@@ -1,43 +1,30 @@
 <script setup lang="ts">
 import axios from 'axios';
+import {TailwindPagination} from "laravel-vue-pagination";
 
 definePageMeta({
   nuddleware:["auth"]
 })
 
-const links = ref([
-  {
-    short_link: "234jlsfsf",
-    full_link: "https://vueschool.io",
-    views: 3,
-    id: 1,
-  },
-  {
-    short_link: "adfaowerw",
-    full_link: "https://google.com",
-    views: 1,
-    id: 2,
-  },
-  {
-    short_link: "234sfdjaip",
-    full_link: "https://vuejsnation.com/",
-    views: 0,
-    id: 3,
-  },
-])
-
-
+const links = ref([]) // enllaços acortados
+const paginationData = ref({})
+const page = ref(1)
 
 async function getLinks(){
 
   try{
-    const response = await axios.get("/links")
-    console.log(response.data)
-    links.value = response.data.data
+    const response = await axios.get("/links?page="+page.value)
+    const data = response.data
+    links.value = data.data
+
+    paginationData.value = data
+
   }catch(err){
     console.error(err.response.data)
   }
 }
+
+watch(page,()=>getLinks())
 
 getLinks()
 
@@ -90,7 +77,7 @@ getLinks()
             </td>
             <td>{{ link.views }}</td>
             <td>
-              <NuxtLink class="no-underline" :to="`/links/${link.id}`"
+              <NuxtLink class="no-underline" :to="`/links/${link.id}`"  
                 ><iconEdit
               /></NuxtLink>
             </td>
@@ -101,7 +88,11 @@ getLinks()
           </tr>
         </tbody>
       </table>
-      <div class="mt-5 flex justify-center"></div>
+      <div class="mt-5 flex justify-center">
+      
+      <TailwindPagination :data="paginationData" @pagination-change-page="page=$event"/>
+
+      </div>
     </div>
 
     <!-- No links message for when table is empty -->
