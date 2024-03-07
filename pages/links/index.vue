@@ -15,8 +15,8 @@ const paginationData = ref({})
 const queries = ref({
   page:route.query.page ? Number(route.query.page) : 1,
   full:route.query["filter[full_link]"] as string || "",
-  short:"",
-  sort:""
+  short:route.query["filter[short_link]"] as string || "",
+  sort:route.query.sort || ""
 })
   
 
