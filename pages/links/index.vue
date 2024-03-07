@@ -7,29 +7,62 @@ definePageMeta({
 })
 
 const route = useRoute()
-console.log("PARAMS",)
 
 const links = ref([]) // enllaços acortados
 const paginationData = ref({})
-const page = ref(route.query.page || 1)
 
-const search = ref("")
-const debouncedSearch = refDebounced(search,200)
+//filters
+const queries = ref({
+  page:route.query.page ? Number(route.query.page) : 1,
+  full:route.query["filter[full_link]"] as string || "",
+  short:"",
+  sort:""
+})
+  
+
+function setParams(){
+  const params = new URLSearchParams()
+  //amacena las variables de filtro en el
+  if(queries.value.page > 1){
+    params.set("page",queries.value.page.toString())
+  }
+  if(queries.value.full !== ""){
+    params.set("filter[full_link]",queries.value.full )
+  } 
+
+  if(queries.value.short !== ""){
+    params.set("filter[short_link]",queries.value.short )
+  }
+
+  if(queries.value.sort !== ""){
+    params.set("sort",queries.value.sort)
+  }
+
+  const paramsStr = params.toString()
+  const newURL = window.location.origin + window.location.pathname +(paramsStr ? "?"+ paramsStr:"")
+  window.history.pushState({  }, '', newURL);
+
+  return params
+}
+
 
 async function getLinks(){
 
-  try{
-    const params = new URLSearchParams()
-    params.set("page",page.value.toString())
-    if(debouncedSearch.value){
-      params.set("filter[full_link]",debouncedSearch.value)
-    }
-    const apiURL = "/links?"+params.toString()
-    console.log("SEARCH",apiURL)
-    const response = await axios.get(apiURL)
-    const data = response.data
-    links.value = data.data
+  const params = setParams()
 
+  try{
+
+    const apiURL = "/links?"+params.toString()
+    const response = await axios.get(apiURL)
+
+    const data = response.data
+
+    //si el usuario está en una página más adelantada que la nueva última página
+    if(data.last_page < queries.value.page){
+      queries.value.page = 1
+    }
+
+    links.value = data.data
     paginationData.value = data
 
   }catch(err){
@@ -37,20 +70,12 @@ async function getLinks(){
   }
 }
 
-watch(page,()=>getLinks())
-watch(route.fullPath,()=>{page.value = route.query.page || 1})
-watch(debouncedSearch,()=>getLinks())
+watch(queries,getLinks,{deep:true})
 
 getLinks()
 
-function handleNewPage(n:number){
-  page.value = n
 
-  const params = new URLSearchParams(window.location.search.slice(1))
-  params.set("page",n.toString())
-  const newURL = window.location.origin + window.location.pathname +"?"+ params.toString()
-  window.history.pushState({  }, '', newURL);
-}
+
 
 </script>
 <template>
@@ -58,7 +83,7 @@ function handleNewPage(n:number){
     <nav class="flex justify-between mb-4 items-center">
       <h1 class="mb-0">My Links</h1>
       <div class="flex items-center">
-        <SearchInput :modelValue="search" @update:modelValue="e=>search = e" />
+        <SearchInput v-model="queries.filter" />
         <NuxtLink to="/links/create" class="ml-4">
           <IconPlusCircle class="inline" /> Create New
         </NuxtLink>
@@ -69,13 +94,13 @@ function handleNewPage(n:number){
       <table class="table-fixed w-full">
         <thead>
           <tr>
-            <th class="w-[35%]">Full Link</th>
-            <th class="w-[35%]">Short Link</th>
-            <th class="w-[10%]">Views</th>
+            <TableTh v-model="queries.sort" name="full_link" class="w-[29%]">Full link</TableTh>
+            <TableTh v-model="queries.sort" name="short_link" class="w-[29%]">Short link</TableTh>
+            <TableTh v-model="queries.sort" name="views" class="w-[16%]">Views</TableTh>
             <th class="w-[10%]">Edit</th>
             <th class="w-[10%]">Trash</th>
             <th class="w-[6%] text-center">
-              <button><IconRefresh /></button>
+              <button @click="getLinks" ><IconRefresh /></button>
             </th>
           </tr>
         </thead>
@@ -114,7 +139,7 @@ function handleNewPage(n:number){
       </table>
       <div class="mt-5 flex justify-center">
       
-      <TailwindPagination :data="paginationData" @pagination-change-page="handleNewPage($event)"/>
+      <TailwindPagination :data="paginationData" @pagination-change-page="queries.page=$event"/>
 
       </div>
     </div>

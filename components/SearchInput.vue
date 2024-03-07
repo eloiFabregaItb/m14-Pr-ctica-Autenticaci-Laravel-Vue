@@ -1,11 +1,17 @@
 <script setup lang="ts">
-defineProps({
-  modelValue: { type: String, required: true },
-});
 
-defineEmits<{
+const model = defineModel()
+
+const emit = defineEmits<{
   (e: "update:modelValue", payload: string): void;
 }>();
+
+const localValue = ref(model.value)
+const debouncedLocalValue = refDebounced(localValue,500)
+watch(debouncedLocalValue,()=>{
+  model.value = debouncedLocalValue.value
+})
+
 </script>
 <template>
   <div class="relative">
@@ -17,10 +23,7 @@ defineEmits<{
       type="text"
       placeholder="Search"
       class="pl-10 p-2 rounded"
-      @input="
-        $emit('update:modelValue', ($event.target as HTMLInputElement).value)
-      "
-      :value="modelValue"
+      v-model="localValue"
     />
   </div>
 </template>
