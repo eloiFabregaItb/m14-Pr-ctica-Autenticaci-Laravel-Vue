@@ -22,7 +22,7 @@ watch(debouncedLocalValue,()=>{
     <input
       type="text"
       placeholder="Search"
-      class="pl-10 p-2 rounded"
+      class="p-2 pl-10 rounded"
       v-model="localValue"
     />
   </div>
