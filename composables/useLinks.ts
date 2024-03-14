@@ -57,7 +57,29 @@ export const useLinks = ({ queries = ref({}) }: UseLinksOptions = {}) => {
     await axios.delete(`/${slug}/${id}`);
   }
 
+  function setParams(){
+    const params = new URLSearchParams()
+    if(queries.value.page > 1){
+      params.set("page",queries.value.page.toString())
+    }
+    if(queries.value["filter[full_link]"] !== ""){
+      params.set("filter[full_link]",queries.value["filter[full_link]"] )
+    }
+    if(queries.value.sort !== ""){
+      params.set("sort",queries.value.sort)
+    }
+
+    const paramsStr = params.toString()
+    const newURL = window.location.origin + window.location.pathname +(paramsStr ? "?"+ paramsStr:"")
+    window.history.pushState({  }, '', newURL);
+  
+    return params
+
+    // useRouter().push({query:queries.value})
+  }
+
   return {
+    setParams,
     find,
     create,
     update,

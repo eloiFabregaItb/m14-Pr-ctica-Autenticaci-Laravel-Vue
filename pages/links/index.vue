@@ -16,12 +16,12 @@ const queries = ref({
   ...route.query
 })
   
-const {data,index:getLinks,destroy} = useLinks({queries})
+const {data,index:getLinks,destroy,setParams} = useLinks({queries})
 await getLinks()
 
 
 watch(queries,
-  ()=>useRouter().push({query:queries.value}),
+  ()=>setParams(useRouter()),
   {deep:true}
 )
 
