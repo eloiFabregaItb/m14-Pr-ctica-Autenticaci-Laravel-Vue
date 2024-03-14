@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import axios from 'axios';
 import {TailwindPagination} from "laravel-vue-pagination";
 
 definePageMeta({
@@ -9,10 +8,6 @@ definePageMeta({
 
 const route = useRoute()
 
-const links = ref([]) // enllaços acortados
-const paginationData = ref({})
-const isLoading = ref(false)
-
 //filters
 const queries = ref({
   page: 1,
@@ -21,17 +16,21 @@ const queries = ref({
   ...route.query
 })
   
-const {data,index:getLinks} = useLinks({queries})
-
-console.log("DATA",data.value)
-
+const {data,index:getLinks,destroy} = useLinks({queries})
+await getLinks()
 
 
-// watch(queries,getLinks,{deep:true})
 watch(queries,
-()=>useRouter().push({query:queries.value}),
-{deep:true})
+  ()=>useRouter().push({query:queries.value}),
+  {deep:true}
+)
 
+async function handleDelete(id:number){
+  await destroy(id)
+  if(data.value){
+    data.value.data = data.value.data.filter(link=>link.id!==id)
+  }
+}
 
 
 
@@ -43,7 +42,7 @@ watch(queries,
     <nav class="flex justify-between mb-4 items-center">
       <h1 class="mb-0">My Links</h1>
       <div class="flex items-center"> 
-        <SearchInput v-model="queries.full" />
+        <SearchInput v-model="queries['filter[full_link]']" />
         <NuxtLink to="/links/create" class="ml-4">
           <IconPlusCircle class="inline" /> Create New
         </NuxtLink>
@@ -65,8 +64,8 @@ watch(queries,
           </tr>
         </thead>
         <tbody>
-          <tr v-for="link in links">
-            <td :title="`created ${useTimeAgo(link.created_at)}`">
+          <tr v-for="link in data?.data">
+            <td :title="`created ${useTimeAgo(link.created_at).value}`">
               <a :href="link.full_link" target="_blank">
                 {{ link.full_link.replace(/^http(s?):\/\//, "") }}</a
               >
@@ -91,7 +90,7 @@ watch(queries,
               /></NuxtLink>
             </td>
             <td>
-              <button><IconTrash /></button>
+              <button @click="handleDelete(link.id)"><IconTrash /></button>
             </td>
             <td></td>
           </tr>
@@ -99,7 +98,7 @@ watch(queries,
       </table>
       <div class="mt-5 flex justify-center">
       
-      <TailwindPagination :data="paginationData" @pagination-change-page="queries.page=$event"/>
+      <TailwindPagination :data="data" @pagination-change-page="queries.page=$event"/>
 
       </div>
     </div>
